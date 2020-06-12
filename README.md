@@ -1,6 +1,6 @@
 # k3s-server Ansible role
 
-![](https://github.com/nemonik/k3s-server-role/workflows/Basic%20role%20syntax%20check/badge.svg)
+![Basic role syntax check](https://github.com/nemonik/k3s-server-role/workflows/Basic%20role%20syntax%20check/badge.svg)
 
 An Ansible role for ensuring the configuration of a master [K3s](https://k3s.io/) server node.
 
