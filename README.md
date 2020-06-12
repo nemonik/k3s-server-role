@@ -10,11 +10,12 @@ The role installs on Centos 7, Alpine 3.10 and Ubuntu bionic.
 
 ## Role Variables
 
-| Variable                | Required | Default      | Choices                   | Comments                                 |
-|-------------------------|----------|--------------|---------------------------|------------------------------------------|
-| default_retries         | yes      | 60           | Integer value             | default number of retries                |
-| default_delay           | yes      | 60           | Integer value             | default delay in seconds between retriies|
-| k3s_version             | yes      | v1.17.5+k3s1 | matches release tag       | k3s version to install                   |
+| Variable                | Required | Default               | Choices             | Comments                                         |
+|-------------------------|----------|-----------------------|---------------------|--------------------------------------------------|
+| default_retries         | yes      | 60                    | Integer value       | default number of retries                        |
+| default_delay           | yes      | 60                    | Integer value       | default delay in seconds between retries         |
+| k3s_version             | yes      | v1.17.5+k3s1          | matches release tag | k3s version to install                           |
+| images_cache_path       | no       | /vagrant/cache/images | Path                | Path to folder used to cache saved Docker images |            
 
 ## Example Playbook
 

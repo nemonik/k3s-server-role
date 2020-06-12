@@ -8,9 +8,9 @@
 # You should have received a copy of the license with
 # this file. If not, please email <mjwalsh@nemonik.com>
 
-- name: create /vagrant/cache/images, if it doesn't exist
+- name: create {{ images_cache_path }}, if it doesn't exist
   file:
-    path: /vagrant/cache/images
+    path: "{{ images_cache_path }}"
     state: directory
 
 - name: load {{ item }} container image from cache
@@ -40,14 +40,14 @@
         archive_name="${archive_name}*"
       fi
 
-      archive_in_cache="$(ls /vagrant/cache/images/${archive_name}.tar)"
+      archive_in_cache="$(ls {{ images_cache_path }}/${archive_name}.tar)"
 
       if [ "${archive_in_cache}" != "" ]; then
         image_in_cache="$(basename ${archive_in_cache} .tar)"
         image_in_cache=${image_in_cache/\%2F/\/}
         image_in_cache=${image_in_cache/\%3A/:}
 
-        docker load --input /vagrant/cache/images/${archive_name}.tar
+        docker load --input {{ images_cache_path }}/${archive_name}.tar
       else
         echo "${image} is not cached."
       fi

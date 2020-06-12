@@ -15,12 +15,16 @@
       - { repository: 'coredns/coredns', tag: '' }
       - { repository: 'rancher/local-path-provisioner', tag: '' }
       - { repository: 'rancher/metrics-server', tag: '' }
+  when:
+    images_cache_path is defined
   tags:
     - k3s-server
 
 - name: load {{ images }} from cache
   include_tasks: retrieve_container_image.yml
   loop: "{{ images }}"
+  when:
+    images_cache_path is defined
   tags:
     - k3s-server
 
@@ -211,13 +215,6 @@
   tags:
     - k3s-server
 
-- name: get uid for /vagrant/Vagrantfile
-  become: yes
-  shell: echo $(stat -c '%U' /vagrant/Vagrantfile)
-  register: owner
-  tags:
-    - k3s-server
-
 - name: ensure {{ ansible_user_id }} can access Kubernetes
   block:
   - name: wait for /etc/rancher/k3s/k3s.yaml to exist
@@ -266,5 +263,7 @@
 - name: save {{ images }} to cache
   include_tasks: cache_container_image.yml
   loop: "{{ images }}"
+  when:
+    images_cache_path is defined
   tags:
     - k3s-server
