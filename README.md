@@ -27,7 +27,7 @@ An example can be found used in my Hands-on DevOps course's [master-playbook.yml
     - k3s-server
 ```
 
-For more information see the [Hands-on DevOps class](https://github.com/nemonik/hands-on-DevOp) project.
+For more information see the [Hands-on DevOps class](https://github.com/nemonik/hands-on-DevOps) project.
 
 ## License
 
