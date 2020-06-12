@@ -6,7 +6,7 @@ An Ansible role for ensuring the configuration of a master [K3s](https://k3s.io/
 
 Requires Docker installed.
 
-The role installs on Centos 7, Alpine 3.11 and Ubuntu bionic.
+The role installs on Centos 7, Alpine 3.10 and Ubuntu bionic.
 
 ## Role Variables
 
