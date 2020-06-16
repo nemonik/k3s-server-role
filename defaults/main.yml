@@ -3,5 +3,4 @@
 default_retries: 60
 default_delay: 10
 k3s_version: v1.17.5+k3s1
-images_cache_path: /vagrant/cache/images
 

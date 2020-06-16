@@ -18,7 +18,7 @@ The role installs on Centos 7, Alpine 3.10 and Ubuntu bionic.
 | default_delay            | yes      | 60                    | Integer value       | default delay in seconds between retries         |
 | k3s_version              | yes      | v1.17.5+k3s1          | matches release tag | k3s version to install                           |
 | vault_k3s_cluster_secret | yes      |                       | String              | Please, set via Ansible vault                    |
-| images_cache_path        | no       | /vagrant/cache/images | Path                | Path to folder used to cache saved Docker images |            
+| images_cache_path        | no       | not defined           | Path                | Path to folder used to cache saved Docker images |            
 
 ## Example Playbook
 
