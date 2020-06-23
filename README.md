@@ -29,8 +29,16 @@ An example can be found used in my Hands-on DevOps course's [ansible/master-play
 - hosts: masters
   remote_user: vagrant
   roles:
+    - common
+    - docker
     - k3s-server
 ```
+
+The above Ansible playbook uses my
+
+- [Common role](https://github.com/nemonik/common-role) to configure the instance past the base CentOS 7, Alpine 3.10 or Ubuntu Bionic image
+- [Docker role](https://github.com/nemonik/docker-role) to install and configure Docker
+- [K3s-server role](https://github.com/nemonik/k3s-server-role) to install Lightweight Kubernetes (K3s)
 
 For more information and to see this role put into action checkout my [Hands-on DevOps class](https://github.com/nemonik/hands-on-DevOps) project.
 
