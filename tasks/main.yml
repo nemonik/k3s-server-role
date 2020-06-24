@@ -28,6 +28,14 @@
   tags:
     - k3s-server
 
+- name: set cache_path to /tmp if not set
+  set_fact:
+    cache_path: /tmp
+  when:
+    - cache_path is not defined
+  tags:
+    - k3s-server
+
 - name: ensure iptables is enabled in a manner preferable to k3s
   block:
   - name: populate service facts
@@ -150,9 +158,9 @@
 
 - name: install and spin up k3s, if needed
   block:
-  - name: create /vagrantcache/boxes if it doesn't exist
+  - name: create {{ cache_path }}, if it doesn't exist
     file:
-      path: /vagrant/cache
+      path: "{{ cache_path }}"
       state: directory
 
   - name: ensure /home/{{ ansible_user_id }}/k3s exists
@@ -162,29 +170,31 @@
 
   - name: is install_k3s.sh cached?
     stat:
-      path: /vagrant/cache/install_k3s.sh
+      path: "{{ cache_path }}/install_k3s.sh"
     register: k3s_distributable
 
   - name: cache install_k3.sh retrieved from https://get.k3s.io
     shell: |
-      if [[ "windows" == "{{ host_os }}" ]]; then
+      if [[ "windows" == "{{ host_os | default('') }}" && "{{ cache_path }}" != "/tmp" ]]; then
          sudo su
       fi
-      rm -f /vagrant/cache/install_k3s.sh
-      wget -O /vagrant/cache/install_k3s.sh https://get.k3s.io
+      rm -f {{ cache_path }}/install_k3s.sh
+      wget -O {{ cache_path }}/install_k3s.sh https://get.k3s.io
     args:
       executable: /bin/bash
     retries: "{{ default_retries }}"
     delay: "{{ default_delay }}"
     register: result
     until: result is succeeded
-    when: k3s_distributable.stat.exists == False
+    when: 
+     - not k3s_distributable.stat.exists
 
   - name: emplace install_k3s.sh into /home/{{ ansible_user_id }}
     copy:
-      src: /vagrant/cache/install_k3s.sh
+      src: "{{ cache_path }}/install_k3s.sh"
       dest: /home/{{ ansible_user_id }}/k3s
       mode: u=rwx,g=r,o=r
+      remote_src: yes
 
   - name: install K3s 
     become: yes
