@@ -1,4 +1,4 @@
-# k3s-server Ansible role
+# K3s Server Ansible role
 
 ![Basic role syntax check](https://github.com/nemonik/k3s-server-role/workflows/Basic%20role%20syntax%20check/badge.svg)
 
