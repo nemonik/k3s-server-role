@@ -158,9 +158,9 @@
 
 - name: install and spin up k3s, if needed
   block:
-  - name: create {{ cache_path }}, if it doesn't exist
+  - name: create {{ cache_path }}/files, if it doesn't exist
     file:
-      path: "{{ cache_path }}"
+      path: "{{ cache_path }}/files"
       state: directory
 
   - name: ensure /home/{{ ansible_user_id }}/k3s exists
@@ -170,7 +170,7 @@
 
   - name: is install_k3s.sh cached?
     stat:
-      path: "{{ cache_path }}/install_k3s.sh"
+      path: "{{ cache_path }}/files/install_k3s.sh"
     register: k3s_distributable
 
   - name: cache install_k3.sh retrieved from https://get.k3s.io
@@ -178,8 +178,8 @@
       if [[ "windows" == "{{ host_os | default('') }}" && "{{ cache_path }}" != "/tmp" ]]; then
          sudo su
       fi
-      rm -f {{ cache_path }}/install_k3s.sh
-      wget -O {{ cache_path }}/install_k3s.sh https://get.k3s.io
+      rm -f {{ cache_path }}/files/install_k3s.sh
+      wget -O {{ cache_path }}/files/install_k3s.sh https://get.k3s.io
     args:
       executable: /bin/bash
     retries: "{{ default_retries }}"
@@ -191,7 +191,7 @@
 
   - name: emplace install_k3s.sh into /home/{{ ansible_user_id }}
     copy:
-      src: "{{ cache_path }}/install_k3s.sh"
+      src: "{{ cache_path }}/files/install_k3s.sh"
       dest: /home/{{ ansible_user_id }}/k3s
       mode: u=rwx,g=r,o=r
       remote_src: yes
