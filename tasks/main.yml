@@ -169,7 +169,11 @@
       - ansible_distribution_major_version == '7'
 
   - name: get ip via ip command
-    shell: ip addr show {{ k3s_flannel_iface }} | grep "inet " | awk '{print $2}' | cut -d / -f1
+    shell: |
+      source /etc/profile
+      ip addr show {{ k3s_flannel_iface }} | grep "inet " | awk '{print $2}' | cut -d / -f1
+    args:
+      executable: /bin/bash
     register: ipaddr
   tags:
     - k3s-server
