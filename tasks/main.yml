@@ -103,6 +103,7 @@
   yum:
     name: "{{ packages }}"
     disablerepo: "epel"
+    disable_gpg_check: yes
   retries: "{{ default_retries }}"
   delay: "{{ default_delay }}"
   register: result
@@ -179,7 +180,7 @@
          sudo su
       fi
       rm -f {{ cache_path }}/files/install_k3s.sh
-      wget -O {{ cache_path }}/files/install_k3s.sh https://get.k3s.io
+      wget --no-check-certificate -O {{ cache_path }}/files/install_k3s.sh https://get.k3s.io
     args:
       executable: /bin/bash
     retries: "{{ default_retries }}"
