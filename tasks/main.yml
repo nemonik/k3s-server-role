@@ -41,13 +41,13 @@
   - name: populate service facts
     service_facts:
 
-  - name: disable firewalld and enable iptables  
+  - name: disable firewalld and enable iptables
     block:
     - name: ensure firewalld is not running
       become: yes
       service:
         name: firewalld
-        enabled: no 
+        enabled: no
         state: stopped
 
     - name: ensure firewalld is masked
@@ -91,9 +91,9 @@
         state: restarted
     when:
       - ansible_facts.services['k3s.service'] is not defined
- 
+
   when:
-    - ansible_distribution == 'CentOS' 
+    - ansible_distribution == 'CentOS'
     - ansible_distribution_major_version == '7'
   tags:
     - k3s-server
@@ -139,23 +139,41 @@
   - name: set interface, if CentOS 7
     set_fact:
       k3s_flannel_iface: 'eth1'
-    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7' 
-    
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+
   - name: set interface, if Ubuntu-bionic
     set_fact:
       k3s_flannel_iface: 'enp0s8'
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'bionic'
 
   - name: fail, if not Alpine or Ubuntu-bionic or CentOS 7
-    fail: 
+    fail:
       msg: "{{ ansible_distribution }} - {{ ansible_distribution_release }} operating system is not currently supported."
-    when: k3s_flannel_iface is not defined
+  when: k3s_flannel_iface is not defined
   tags:
     - k3s-server
 
 - name: get ip for {{ k3s_flannel_iface }}
-  shell: ip a show {{ k3s_flannel_iface }} | grep "inet " | awk '{print $2}' | cut -d / -f1
-  register: ipaddr
+  block:
+  - name: install iproute, if CentOs 7
+    become: yes
+    yum:
+      name: iproute
+      disable_gpg_check: yes
+    retries: "{{ default_retries }}"
+    delay: "{{ default_delay }}"
+    register: result
+    until: result is succeeded
+    when:
+      - ansible_distribution == 'CentOS'
+      - ansible_distribution_major_version == '7'
+
+  - name: get ip via ip command
+    shell: ip addr show {{ k3s_flannel_iface }} | grep "inet " | awk '{print $2}' | cut -d / -f1
+    register: ipaddr
+
+- debug:
+    msg: "{[ ipaddr }}"
 
 - name: install and spin up k3s, if needed
   block:
@@ -180,14 +198,14 @@
          sudo su
       fi
       rm -f {{ cache_path }}/files/install_k3s.sh
-      wget --no-check-certificate -O {{ cache_path }}/files/install_k3s.sh https://get.k3s.io
+      wget --no-check-certificate -O {{ cache_path }}/files/install_k3s.sh https://raw.githubusercontent.com/rancher/k3s/master/install.sh
     args:
       executable: /bin/bash
     retries: "{{ default_retries }}"
     delay: "{{ default_delay }}"
     register: result
     until: result is succeeded
-    when: 
+    when:
      - not k3s_distributable.stat.exists
 
   - name: emplace install_k3s.sh into /home/{{ ansible_user_id }}
@@ -197,7 +215,7 @@
       mode: u=rwx,g=r,o=r
       remote_src: yes
 
-  - name: install K3s 
+  - name: install K3s
     become: yes
 #    shell: INSTALL_K3S_VERSION={{ k3s_version }} INSTALL_K3S_EXEC="--flannel-backend=host-gw --flannel-iface={{ k3s_flannel_iface }} --cluster-secret={{ vault_k3s_cluster_secret }} --docker --no-deploy=traefik --no-deploy=servicelb --no-deploy metrics-server" /home/{{ ansible_user_id }}/k3s/install_k3s.sh
     shell: INSTALL_K3S_VERSION={{ k3s_version }} INSTALL_K3S_EXEC="--flannel-backend=host-gw --flannel-iface={{ k3s_flannel_iface }} --cluster-secret={{ vault_k3s_cluster_secret }} --docker --no-deploy=traefik --no-deploy=servicelb" /home/{{ ansible_user_id }}/k3s/install_k3s.sh
@@ -205,14 +223,14 @@
     delay: "{{ default_delay }}"
     register: result
     until: result is succeeded
-   
+
   - name: alias `kubectl` to `k3s kubectl`
     become: yes
     copy:
       dest: /etc/profile.d/alias_kubectl.sh
       content: |
         alias kubectl="k3s kubectl"
-  when:  
+  when:
     k3s_service.stdout=="false"
   tags:
     - k3s-server
