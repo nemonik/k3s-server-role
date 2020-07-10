@@ -171,9 +171,8 @@
   - name: get ip via ip command
     shell: ip addr show {{ k3s_flannel_iface }} | grep "inet " | awk '{print $2}' | cut -d / -f1
     register: ipaddr
-
-- debug:
-    msg: "{[ ipaddr }}"
+  tags:
+    - k3s-server
 
 - name: install and spin up k3s, if needed
   block:
