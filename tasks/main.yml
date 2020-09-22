@@ -226,7 +226,13 @@
     delay: "{{ default_delay }}"
     register: result
     until: result is succeeded
-    
+
+  - name: alias `kubectl` to `k3s kubectl`
+    become: yes
+    copy:
+      dest: /etc/profile.d/alias_kubectl.sh
+      content: |
+        alias kubectl="k3s kubectl"
   when:
     k3s_service.stdout=="false"
   tags:
@@ -265,6 +271,24 @@
       path: /home/{{ ansible_user_id }}/kubeconfig.yml
       regexp: '^    server: https://127.0.0.1:6443'
       replace: '    server: https://{{ ipaddr.stdout }}:6443'
+
+  - name: ensure /home/{{ ansible_user_id }}/.bash_profile exists
+    copy:
+      content: ""
+      dest: /home/{{ ansible_user_id }}/.bash_profile
+      force: no
+
+  - name: ensure KUBECONFIG is removed from {{ ansible_user_id }}'s bash_profile
+    lineinfile:
+      dest: /home/{{ ansible_user_id }}/.bash_profile
+      regexp: '^export KUBECONFIG'
+      state: absent
+
+  - name: ensure KUBECONFIG is in {{ ansible_user_id }}'s bash_profile
+    lineinfile:
+      dest:  /home/{{ ansible_user_id }}/.bash_profile
+      line: 'export KUBECONFIG="/home/{{ ansible_user_id }}/kubeconfig.yml"'
+      insertafter: EOF
   tags:
     - k3s-server
 
