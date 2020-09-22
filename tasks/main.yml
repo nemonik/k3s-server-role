@@ -266,10 +266,10 @@
       group: "{{ ansible_user_id }}"
       mode: u=rw,g=r
 
-  - name: ensure https://127.0.0.1:6443 is replaced with https://{{ ipaddr.stdout }}:6443 in /home/{{ ansible_user_id }}/kubeconfig.yml
+  - name: ensure https://0.0.0.0:6443 is replaced with https://{{ ipaddr.stdout }}:6443 in /home/{{ ansible_user_id }}/kubeconfig.yml
     replace:
       path: /home/{{ ansible_user_id }}/kubeconfig.yml
-      regexp: '^    server: https://127.0.0.1:6443'
+      regexp: '^    server: https://0.0.0.0:6443'
       replace: '    server: https://{{ ipaddr.stdout }}:6443'
 
   - name: ensure /home/{{ ansible_user_id }}/.bash_profile exists
