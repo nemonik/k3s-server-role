@@ -241,6 +241,33 @@
   tags:
     - k3s-server
 
+- name: ensure {{ ansible_user_id }} can access Kubernetes
+  block:
+  - name: wait for /etc/rancher/k3s/k3s.yaml to exist
+    wait_for:
+      path: /etc/rancher/k3s/k3s.yaml
+      state: present
+      delay: 0
+    ignore_errors: yes
+
+  - name: ensure the {{ ansible_user_id }} user has an kubeconfig.yml file to access kubernetes
+    become: yes
+    copy:
+      src: /etc/rancher/k3s/k3s.yaml
+      dest: /home/{{ ansible_user_id }}/kubeconfig.yml
+      remote_src: yes
+      owner: "{{ ansible_user_id }}"
+      group: "{{ ansible_user_id }}"
+      mode: u=rw,g=r
+
+  - name: ensure https://127.0.0.1:6443 is replaced with https://{{ ipaddr.stdout }}:6443 in /home/{{ ansible_user_id }}/kubeconfig.yml
+    replace:
+      path: /home/{{ ansible_user_id }}/kubeconfig.yml
+      regexp: '^    server: https://127.0.0.1:6443'
+      replace: '    server: https://{{ ipaddr.stdout }}:6443'
+  tags:
+    - k3s-server
+
 - name: save {{ images }} to cache
   include_tasks: cache_container_image.yml
   loop: "{{ images }}"
