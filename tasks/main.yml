@@ -226,13 +226,7 @@
     delay: "{{ default_delay }}"
     register: result
     until: result is succeeded
-
-#  - name: alias `kubectl` to `k3s kubectl`
-#    become: yes
-#    copy:
-#      dest: /etc/profile.d/alias_kubectl.sh
-#      content: |
-#        alias kubectl="k3s kubectl"
+    
   when:
     k3s_service.stdout=="false"
   tags:
@@ -244,51 +238,6 @@
     name: k3s
     enabled: yes
     state: started
-  tags:
-    - k3s-server
-
-- name: ensure {{ ansible_user_id }} can access Kubernetes
-  block:
-  - name: wait for /etc/rancher/k3s/k3s.yaml to exist
-    wait_for:
-      path: /etc/rancher/k3s/k3s.yaml
-      state: present
-      delay: 0
-    ignore_errors: yes
-
-  - name: ensure the {{ ansible_user_id }} user has an kubeconfig.yml file to access kubernetes
-    become: yes
-    copy:
-      src: /etc/rancher/k3s/k3s.yaml
-      dest: /home/{{ ansible_user_id }}/kubeconfig.yml
-      remote_src: yes
-      owner: "{{ ansible_user_id }}"
-      group: "{{ ansible_user_id }}"
-      mode: u=rw,g=r
-
-  - name: ensure https://127.0.0.1:6443 is replaced with https://{{ ipaddr.stdout }}:6443 in /home/{{ ansible_user_id }}/kubeconfig.yml
-    replace:
-      path: /home/{{ ansible_user_id }}/kubeconfig.yml
-      regexp: '^    server: https://127.0.0.1:6443'
-      replace: '    server: https://{{ ipaddr.stdout }}:6443'
-
-  - name: ensure /home/{{ ansible_user_id }}/.bash_profile exists
-    copy:
-      content: ""
-      dest: /home/{{ ansible_user_id }}/.bash_profile
-      force: no
-
-  - name: ensure KUBECONFIG is removed from {{ ansible_user_id }}'s bash_profile
-    lineinfile:
-      dest: /home/{{ ansible_user_id }}/.bash_profile
-      regexp: '^export KUBECONFIG'
-      state: absent
-
-  - name: ensure KUBECONFIG is in {{ ansible_user_id }}'s bash_profile
-    lineinfile:
-      dest:  /home/{{ ansible_user_id }}/.bash_profile
-      line: 'export KUBECONFIG="/home/{{ ansible_user_id }}/kubeconfig.yml"'
-      insertafter: EOF
   tags:
     - k3s-server
 
