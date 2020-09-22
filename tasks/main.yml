@@ -227,12 +227,12 @@
     register: result
     until: result is succeeded
 
-  - name: alias `kubectl` to `k3s kubectl`
-    become: yes
-    copy:
-      dest: /etc/profile.d/alias_kubectl.sh
-      content: |
-        alias kubectl="k3s kubectl"
+#  - name: alias `kubectl` to `k3s kubectl`
+#    become: yes
+#    copy:
+#      dest: /etc/profile.d/alias_kubectl.sh
+#      content: |
+#        alias kubectl="k3s kubectl"
   when:
     k3s_service.stdout=="false"
   tags:
