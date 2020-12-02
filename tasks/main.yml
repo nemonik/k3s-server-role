@@ -49,7 +49,7 @@
         name: firewalld
         enabled: no
         state: stopped
-       ignore_errors: yes
+      ignore_errors: yes
 
     - name: ensure firewalld is masked
       become: yes
